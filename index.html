@@ -88,6 +88,8 @@ tr:hover td{background:var(--accent-soft)}
 </style>
 </head>
 <body>
+
+
 <div class="wrap">
   <header>
     <div>
@@ -159,11 +161,13 @@ tr:hover td{background:var(--accent-soft)}
       <div class="row" style="justify-content:space-between">
         <div class="field" style="flex:1 1 200px">
           <label class="label" for="fname">File name</label>
-          <input type="text" id="fname" value="orders.csv">
+          <input type="text" id="fname" value="orders">
         </div>
+        <p class="note" style="flex-basis:100%;margin:0">Excel changes numbers when it opens a CSV (152.4700 becomes 152.47, 0010 becomes 10). The .xlsx download and Copy for Excel keep every value exactly as written.</p>
         <div class="actions">
           <button id="btn-copy" type="button" title="Copies with tabs between columns, so it pastes straight into Excel cells">Copy for Excel</button>
-          <button id="btn-dl" type="button" class="primary">Download CSV</button>
+          <button id="btn-dl" type="button">Download CSV</button>
+          <button id="btn-xlsx" type="button" class="primary" title="Every cell is saved as text, so Excel shows values exactly as they are in the XML">Download Excel (.xlsx)</button>
         </div>
       </div>
       <div id="dl-status"></div>
@@ -171,6 +175,7 @@ tr:hover td{background:var(--accent-soft)}
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 /* Example data only: fictional orders shaped like the order export. */
 const SAMPLE = `<?xml version="1.0" encoding="utf-8"?>
@@ -434,7 +439,7 @@ function toCSV(d=$('delim').value){
   return [cols.map(q).join(d),...rows.map(r=>cols.map(c=>q(r.get(c))).join(d))].join('\r\n')+'\r\n';
 }
 
-function updateBtns(){const ok=rows.length&&activeCols().length;$('btn-dl').disabled=!ok;$('btn-copy').disabled=!ok}
+function updateBtns(){const ok=rows.length&&activeCols().length;$('btn-dl').disabled=!ok;$('btn-copy').disabled=!ok;$('btn-xlsx').disabled=!ok||!window.XLSX}
 
 function run(){
   const r=parse(src.value);
@@ -462,10 +467,10 @@ $('cols').addEventListener('click',e=>{const el=e.target.closest('.chip');if(el)
 $('cols').addEventListener('keydown',e=>{const el=e.target.closest('.chip');if(el&&(e.key===' '||e.key==='Enter')){e.preventDefault();toggle(+el.dataset.i);requestAnimationFrame(()=>$('cols').querySelector(`[data-i="${el.dataset.i}"]`)?.focus())}});
 function toggle(i){const c=columns[i];enabled.has(c)?enabled.delete(c):enabled.add(c);userTouched=true;render()}
 
-$('btn-sample').onclick=()=>{src.value=SAMPLE;$('fname').value='orders-example.csv';run()};
+$('btn-sample').onclick=()=>{src.value=SAMPLE;$('fname').value='orders-example';run()};
 $('btn-clear').onclick=()=>{src.value='';run();src.focus()};
 
-function loadFile(f){if(!f)return;const rd=new FileReader();rd.onload=()=>{src.value=rd.result;$('fname').value=f.name.replace(/\.[^.]+$/,'')+'.csv';run()};rd.readAsText(f)}
+function loadFile(f){if(!f)return;const rd=new FileReader();rd.onload=()=>{src.value=rd.result;$('fname').value=f.name.replace(/\.[^.]+$/,'');run()};rd.readAsText(f)}
 $('file').addEventListener('change',e=>loadFile(e.target.files[0]));
 const drop=$('drop');
 [drop,src].forEach(el=>{
@@ -477,28 +482,51 @@ const drop=$('drop');
 /* Saving: uses Claude's download prompt when opened as a Claude artifact, a normal browser download everywhere else */
 let claudeDownloads=null;
 (async()=>{try{if(window.claude&&window.claude.use)claudeDownloads=await window.claude.use('downloads')}catch(e){claudeDownloads=null}})();
-function fileName(){let fn=$('fname').value.trim()||'orders.csv';fn=fn.replace(/\.(csv|txt|tsv)$/i,'')+'.csv';return fn}
-$('btn-dl').onclick=async()=>{
-  const ds=$('dl-status'), fn=fileName();
-  const blob=new Blob([($('bom').checked?'﻿':'')+toCSV()],{type:'text/csv;charset=utf-8'});
+function baseName(){return ($('fname').value.trim()||'orders').replace(/\.(csv|txt|tsv|xlsx)$/i,'')}
+async function saveFile(fn,blob){
+  const ds=$('dl-status');
   if(claudeDownloads){
     try{await claudeDownloads.save({filename:fn,data:blob});status(ds,'ok',`Saved ${fn}`)}
-    catch(e){const c=e&&e.code;status(ds,c==='declined'?'info':'err',c==='declined'?'Download cancelled.':c==='rate_limited'?'A save prompt is already open. Finish that one first.':'The download couldn’t start here. Use Copy for Excel instead.')}
+    catch(e){const c=e&&e.code;status(ds,c==='declined'?'info':'err',c==='declined'?'Download cancelled.':c==='rate_limited'?'A save prompt is already open. Finish that one first.':'The download couldn\u2019t start here. Use Copy for Excel instead.')}
     return;
   }
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download=fn;document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),2000);
   status(ds,'ok',`Downloaded ${fn}`);
+}
+$('btn-dl').onclick=()=>saveFile(baseName()+'.csv',new Blob([($('bom').checked?'\uFEFF':'')+toCSV()],{type:'text/csv;charset=utf-8'}));
+function sheetRows(){const cols=activeCols();return [cols,...rows.map(r=>cols.map(c=>{const v=r.get(c);return v==null?'':String(v)}))]}
+function xlsxBlob(){
+  const ws=XLSX.utils.aoa_to_sheet(sheetRows());              // every value is a string, so it is stored as text
+  for(const k in ws){if(k[0]!=='!'&&ws[k].t==='s')ws[k].z='@'}   // text cell format, so later edits stay text too
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Data');
+  return new Blob([XLSX.write(wb,{bookType:'xlsx',type:'array'})],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+}
+$('btn-xlsx').onclick=()=>{
+  if(!window.XLSX){status($('dl-status'),'err','The Excel writer didn\u2019t load. Check your connection and reload the page.');return}
+  saveFile(baseName()+'.xlsx',xlsxBlob());
 };
+function excelHtml(){
+  const e=v=>esc(v).replace(/\r?\n/g,'<br style="mso-data-placement:same-cell">');
+  return '<html><head><meta charset="utf-8"><style>td{mso-number-format:"\\@";white-space:normal}</style></head><body><table>'+
+    sheetRows().map(r=>'<tr>'+r.map(v=>'<td>'+e(v)+'</td>').join('')+'</tr>').join('')+'</table></body></html>';
+}
 $('btn-copy').onclick=async()=>{
-  const ds=$('dl-status'), csv=toCSV('\t');
-  try{await navigator.clipboard.writeText(csv);status(ds,'ok','Copied. Click cell A1 in Excel and paste.')}
-  catch(e){const ta=document.createElement('textarea');ta.value=csv;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
-    let ok=false;try{ok=document.execCommand('copy')}catch(_){}ta.remove();status(ds,ok?'ok':'err',ok?'Copied. Click cell A1 in Excel and paste.':'Copy was blocked. Download the file instead.')}
+  const ds=$('dl-status'), tsv=toCSV('\t'), msg='Copied. Click cell A1 in Excel and paste.';
+  try{
+    if(window.ClipboardItem&&navigator.clipboard.write){
+      await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([excelHtml()],{type:'text/html'}),'text/plain':new Blob([tsv],{type:'text/plain'})})]);
+    } else await navigator.clipboard.writeText(tsv);
+    status(ds,'ok',msg);
+  }catch(e){
+    try{await navigator.clipboard.writeText(tsv);status(ds,'ok',msg);return}catch(_){}
+    const ta=document.createElement('textarea');ta.value=tsv;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
+    let ok=false;try{ok=document.execCommand('copy')}catch(_){}ta.remove();status(ds,ok?'ok':'err',ok?msg:'Copy was blocked. Download the Excel file instead.')}
 };
+window.addEventListener('load',updateBtns);
 
-src.value=SAMPLE;$('fname').value='orders-example.csv';run();
+src.value=SAMPLE;$('fname').value='orders-example';run();
 </script>
 </body>
 </html>
