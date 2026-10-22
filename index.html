@@ -16,6 +16,7 @@
   --code-bg:#f8f9fb;
   --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#10141c; --surface:#171d28; --line:#2a3344; --fg:#e4e9f2; --muted:#98a3b6;
@@ -29,14 +30,14 @@
   --code-bg:#121821; color-scheme:dark}
 
 *{box-sizing:border-box}
-html{color-scheme:light}
+[hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
 .wrap{max-width:1400px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
 header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
 h1{font-size:1.5rem;margin:0;letter-spacing:-.01em;text-wrap:balance}
 h1 code{font-family:var(--f-mono);font-size:.82em;color:var(--accent);font-weight:600}
-.sub{margin:4px 0 0;color:var(--muted);max-width:62ch}
+.sub{margin:4px 0 0;color:var(--muted);max-width:68ch}
 .grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:18px;align-items:start}
 @media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
@@ -44,15 +45,16 @@ h1 code{font-family:var(--f-mono);font-size:.82em;color:var(--accent);font-weigh
 .label{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700}
 textarea{width:100%;min-height:340px;resize:vertical;font-family:var(--f-mono);font-size:12.5px;line-height:1.55;
   background:var(--code-bg);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:12px;tab-size:2}
-textarea:focus,select:focus,input:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+textarea:focus,select:focus,input:focus,button:focus-visible,.chip:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .drop{border:1.5px dashed var(--line);border-radius:8px;padding:12px;text-align:center;color:var(--muted);font-size:.9rem;cursor:pointer}
 .drop.over{border-color:var(--accent);background:var(--accent-soft);color:var(--fg)}
 .drop strong{color:var(--accent)}
 .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .field{display:flex;flex-direction:column;gap:4px;min-width:0}
-select,input[type=text]{font:inherit;font-size:.9rem;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:6px 8px;max-width:100%}
+select,input[type=text],input[type=search]{font:inherit;font-size:.9rem;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:6px 8px;max-width:100%}
 .check{display:flex;gap:6px;align-items:center;font-size:.9rem;cursor:pointer}
 button{font:inherit;font-size:.9rem;border-radius:6px;padding:8px 14px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
+button.sm{padding:4px 10px;font-size:.8rem}
 button:hover{border-color:var(--accent)}
 button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
 button.primary:hover{filter:brightness(1.08)}
@@ -64,14 +66,19 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .stats{display:flex;flex-wrap:wrap;gap:18px;font-variant-numeric:tabular-nums}
 .stat b{display:block;font-size:1.35rem;font-family:var(--f-mono);font-weight:600}
 .stat span{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-.cols{display:flex;flex-wrap:wrap;gap:6px;max-height:140px;overflow:auto}
+details.colpick{border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+details.colpick summary{cursor:pointer;font-size:.9rem}
+.colbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+.colbar input{flex:1 1 200px}
+.cols{display:flex;flex-wrap:wrap;gap:6px;max-height:200px;overflow:auto}
 .chip{font-family:var(--f-mono);font-size:11.5px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);cursor:pointer;user-select:none;background:var(--surface);color:var(--muted)}
 .chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--fg)}
 .tablebox{overflow:auto;max-height:460px;border:1px solid var(--line);border-radius:8px}
 table{border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums;min-width:100%}
 th,td{padding:6px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;white-space:nowrap;max-width:320px;overflow:hidden;text-overflow:ellipsis}
 th{position:sticky;top:0;background:var(--code-bg);font-family:var(--f-mono);font-weight:600;font-size:11.5px;z-index:1}
-td.n,th.n{color:var(--muted);text-align:right;font-family:var(--f-mono)}
+td.n,th.n{color:var(--muted);text-align:right;font-family:var(--f-mono);position:sticky;left:0;background:var(--surface)}
+th.n{z-index:2;background:var(--code-bg)}
 tr:hover td{background:var(--accent-soft)}
 .empty{padding:28px;text-align:center;color:var(--muted)}
 .note{font-size:.82rem;color:var(--muted)}
@@ -85,7 +92,7 @@ tr:hover td{background:var(--accent-soft)}
   <header>
     <div>
       <h1>XML <code>→</code> CSV Converter</h1>
-      <p class="sub">Internal tool. Everything runs in your browser; nothing you paste is uploaded. Paste page source or drop an XML file. The converter finds the repeating records, flattens nested tags and attributes into columns, and gives you a CSV to download.</p>
+      <p class="sub">Internal tool. Paste the order XML page source or drop an .xml file. Each order becomes one row, and nested fields become columns such as <code>Customer/_oid</code> and <code>OrderItems/OrderItem/0/Price</code>. Everything runs in your browser; nothing you paste is uploaded.</p>
     </div>
   </header>
 
@@ -100,9 +107,9 @@ tr:hover td{background:var(--accent-soft)}
       </div>
       <label class="drop" id="drop" for="file">
         Drop an <strong>.xml</strong> file here or click to choose one
-        <input class="hidden-input" type="file" id="file" accept=".xml,.rss,.atom,.kml,.gpx,.txt,.html,text/xml,application/xml">
+        <input class="hidden-input" type="file" id="file" accept=".xml,.txt,.html,text/xml,application/xml">
       </label>
-      <textarea id="src" spellcheck="false" aria-label="XML source" placeholder="<?xml version=&quot;1.0&quot;?>&#10;<items>&#10;  <item>…</item>&#10;</items>"></textarea>
+      <textarea id="src" spellcheck="false" aria-label="XML source" placeholder="Paste the XML page source here"></textarea>
       <div id="parse-status"></div>
     </section>
 
@@ -122,14 +129,14 @@ tr:hover td{background:var(--accent-soft)}
           <select id="delim">
             <option value=",">Comma ,</option>
             <option value=";">Semicolon ;</option>
-            <option value="\t">Tab</option>
+            <option value="tab">Tab</option>
           </select>
         </div>
         <div class="field">
           <label class="label" for="multi">Repeated tags</label>
           <select id="multi">
-            <option value=" | ">Join with |</option>
-            <option value="; ">Join with ;</option>
+            <option value="index">Number them (0, 1, 2…)</option>
+            <option value=" | ">Join into one cell with |</option>
             <option value="first">Keep first only</option>
           </select>
         </div>
@@ -137,10 +144,15 @@ tr:hover td{background:var(--accent-soft)}
         <label class="check"><input type="checkbox" id="bom" checked> Excel-friendly (UTF-8 BOM)</label>
       </div>
 
-      <div class="field">
-        <span class="label">Columns <span class="note" style="text-transform:none;letter-spacing:0;font-weight:400">— click to include or leave out</span></span>
+      <details class="colpick" id="colpick">
+        <summary><span id="col-summary">Choose columns</span></summary>
+        <div class="colbar">
+          <input type="search" id="col-filter" placeholder="Filter columns, e.g. Price or OrderItem/0" aria-label="Filter columns">
+          <button class="sm" type="button" id="col-all">Include shown</button>
+          <button class="sm" type="button" id="col-none">Leave out shown</button>
+        </div>
         <div class="cols" id="cols"></div>
-      </div>
+      </details>
 
       <div class="tablebox" id="tablebox"><div class="empty">Paste XML on the left to see rows here.</div></div>
       <p class="note" id="preview-note"></p>
@@ -148,7 +160,7 @@ tr:hover td{background:var(--accent-soft)}
       <div class="row" style="justify-content:space-between">
         <div class="field" style="flex:1 1 200px">
           <label class="label" for="fname">File name</label>
-          <input type="text" id="fname" value="converted.csv">
+          <input type="text" id="fname" value="orders.csv">
         </div>
         <div class="actions">
           <button id="btn-copy" type="button">Copy CSV</button>
@@ -161,111 +173,221 @@ tr:hover td{background:var(--accent-soft)}
 </div>
 
 <script>
-const SAMPLE = `<?xml version="1.0" encoding="UTF-8"?>
-<!-- Example data: a roofing supplier product feed -->
-<catalog supplier="Example Supply Co" updated="2026-10-01">
-  <product sku="RF-1001" status="active">
-    <name>Colorbond Trimdek Sheet</name>
-    <category>Roof Sheeting</category>
-    <price currency="AUD">42.50</price>
-    <unit>per metre</unit>
-    <colours><colour>Monument</colour><colour>Surfmist</colour><colour>Woodland Grey</colour></colours>
-    <dimensions><width>762</width><thickness>0.42</thickness></dimensions>
-  </product>
-  <product sku="RF-1002" status="active">
-    <name>Ridge Capping 2.4m</name>
-    <category>Flashings</category>
-    <price currency="AUD">28.90</price>
-    <unit>each</unit>
-    <colours><colour>Monument</colour><colour>Basalt</colour></colours>
-    <dimensions><width>300</width><thickness>0.55</thickness></dimensions>
-  </product>
-  <product sku="RF-1003" status="discontinued">
-    <name>Valley Iron 3.0m</name>
-    <category>Flashings</category>
-    <price currency="AUD">36.00</price>
-    <unit>each</unit>
-    <colours><colour>Zincalume</colour></colours>
-    <dimensions><width>480</width><thickness>0.55</thickness></dimensions>
-  </product>
-  <product sku="RF-1004" status="active">
-    <name>Roofing Screws Type 17 (100 pk)</name>
-    <category>Fasteners</category>
-    <price currency="AUD">31.75</price>
-    <unit>pack</unit>
-    <colours><colour>Monument</colour><colour>Surfmist</colour></colours>
-    <dimensions><width></width><thickness></thickness></dimensions>
-  </product>
-  <product sku="RF-1005" status="active">
-    <name>Anticon Blanket 60mm</name>
-    <category>Insulation</category>
-    <price currency="AUD">189.00</price>
-    <unit>roll</unit>
-    <colours/>
-    <dimensions><width>1350</width><thickness>60</thickness></dimensions>
-  </product>
-</catalog>`;
+/* Example data only: fictional orders shaped like the order export. */
+const SAMPLE = `<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfOrder>
+  <Order>
+    <Oid>00000000-example-0001</Oid>
+    <Did>900001</Did>
+    <CreatedOn>2026-10-12T01:18:18.963Z</CreatedOn>
+    <CreatedBy>example.user</CreatedBy>
+    <Customer oid="11111111-example-cust" externalID="C0001">Example Builders Pty Ltd</Customer>
+    <BACompany>Example Builders Pty Ltd</BACompany>
+    <BAStreetAddress>1 Sample Street</BAStreetAddress>
+    <BAZIP>2000</BAZIP>
+    <BACity>Sydney</BACity>
+    <BAState>NSW - New South Wales</BAState>
+    <BALand>AU</BALand>
+    <Email>orders@example.com</Email>
+    <DeliveryType oid="22222222-example-del">01 - Pick Up (2 Day STD Lead Time) - Cutoff 2PM</DeliveryType>
+    <Description>Example job - ridge capping</Description>
+    <Total>194.08</Total>
+    <TotalTaxAmount>19.41</TotalTaxAmount>
+    <GrossTotal>213.49</GrossTotal>
+    <Status oid="33333333-example-stat">Finished (E)</Status>
+    <StatusList oid="44444444-example-list" />
+    <OrderItems>
+      <OrderItem>
+        <Oid>aaaa0001-example</Oid>
+        <Index>1</Index>
+        <Comments />
+        <Description>Galvanised 0.55mm; Length: 3,000 mm; Width: 390.5 mm; Bendings: 4
+Radius: 25
+Length: 3,000 mm</Description>
+        <Material oid="55555555-example-mat" externalID="FLA-EXAMPLE">Galvanised 0.55mm</Material>
+        <Name>Custom Roll Top Ridge</Name>
+        <Price>194.08</Price>
+        <Quantity>7</Quantity>
+        <AccountingUnit oid="66666666-example-unit">Piece</AccountingUnit>
+        <TemplateParameters xml:space="preserve">
+          <Item name="Arch_R">25</Item>
+          <Item name="Angle">130</Item>
+          <Item name="ZUpdate" />
+        </TemplateParameters>
+        <HasNoPrice>false</HasNoPrice>
+      </OrderItem>
+      <OrderItem>
+        <Oid>aaaa0002-example</Oid>
+        <Index>2</Index>
+        <Comments />
+        <Description>Delivery Type: 01 - Pick Up (2 Day STD Lead Time) - Cutoff 2PM</Description>
+        <Name>Shipping Cost</Name>
+        <Price>0</Price>
+        <Quantity>1</Quantity>
+        <HasNoPrice>true</HasNoPrice>
+      </OrderItem>
+    </OrderItems>
+  </Order>
+  <Order>
+    <Oid>00000000-example-0002</Oid>
+    <Did>900002</Did>
+    <CreatedOn>2026-10-16T05:29:26.783Z</CreatedOn>
+    <CreatedBy>example.user</CreatedBy>
+    <Customer oid="77777777-example-cust" externalID="C0002">Sample Roofing Co</Customer>
+    <BACompany>Sample Roofing Co</BACompany>
+    <BAStreetAddress>PO Box 123</BAStreetAddress>
+    <BAZIP>2226</BAZIP>
+    <BACity>Jannali</BACity>
+    <BAState>NSW - New South Wales</BAState>
+    <BALand>AU</BALand>
+    <Email>hello@example.org</Email>
+    <DeliveryType oid="22222222-example-del">01 - Pick Up (2 Day STD Lead Time) - Cutoff 2PM</DeliveryType>
+    <Description>Example job - flashings</Description>
+    <Total>98.37</Total>
+    <TotalTaxAmount>9.84</TotalTaxAmount>
+    <GrossTotal>108.21</GrossTotal>
+    <Status oid="33333333-example-stat">Finished (E)</Status>
+    <StatusList oid="44444444-example-list" />
+    <OrderItems>
+      <OrderItem>
+        <Oid>bbbb0001-example</Oid>
+        <Index>1</Index>
+        <Comments />
+        <Description>Surfmist 0.55mm; Length: 3,000 mm; Width: 574.1 mm; Bendings: 10</Description>
+        <Material oid="88888888-example-mat" externalID="FLA-EXAMPLE2">Surfmist 0.55mm</Material>
+        <Name>New Profile</Name>
+        <Price>98.37</Price>
+        <Quantity>4</Quantity>
+        <AccountingUnit oid="66666666-example-unit">Piece</AccountingUnit>
+        <HasNoPrice>false</HasNoPrice>
+      </OrderItem>
+    </OrderItems>
+    <ScheduledBy>example.user</ScheduledBy>
+  </Order>
+</ArrayOfOrder>`;
 
 const $ = id => document.getElementById(id);
 const src=$('src'), recSel=$('rec');
-let doc=null, candidates=[], columns=[], rows=[], enabled=new Set(), isHtml=false;
-const PREVIEW_MAX=200;
+let doc=null, candidates=[], columns=[], rows=[], enabled=new Set(), userTouched=false;
+const PREVIEW_MAX=50;
 
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function status(el,kind,msg){el.innerHTML=msg?`<span class="status ${kind}">${esc(msg)}</span>`:''}
-function name(el){return el.localName ? (el.prefix?el.prefix+':':'')+el.localName : el.nodeName}
-function kids(el){return Array.from(el.children)}
-function pathOf(el){const p=[];while(el && el.parentElement){p.unshift(name(el));el=el.parentElement}if(el)p.unshift(name(el));return p.join('/')}
+function elKids(el){return Array.from(el.children)}
+function tag(el){return el.localName||el.nodeName}
+function pathOf(el){const p=[];for(let e=el;e&&e.nodeType===1;e=e.parentNode)p.unshift(tag(e));return p.join('/')}
 
+/* ---------- reading the source ---------- */
+function cleanSource(t){
+  t=t.replace(/^﻿/,'').trim();
+  t=t.replace(/^This XML file does not appear to have any style information[^\n]*\n?/i,'').trim();
+  const i=t.indexOf('<'); if(i>0)t=t.slice(i);
+  return t;
+}
+function parseXml(t){
+  const d=new DOMParser().parseFromString(t,'application/xml');
+  const pe=d.getElementsByTagName('parsererror')[0];
+  return pe?{err:(pe.textContent||'').split('\n').map(s=>s.trim()).filter(Boolean).slice(0,2).join(' ')}:{doc:d};
+}
 function parse(text){
-  text=text.trim();
-  if(!text) return {doc:null};
-  let d=new DOMParser().parseFromString(text,'application/xml');
-  const pe=d.querySelector('parsererror');
-  if(!pe) return {doc:d,html:false};
-  // Fall back to HTML parsing for web page source
-  const h=new DOMParser().parseFromString(text,'text/html');
-  const msg=(pe.textContent||'').split('\n').find(l=>l.trim())||'Invalid XML';
-  return {doc:h,html:true,warn:msg.trim()};
-}
-
-function findCandidates(d){
-  const counts=new Map();
-  const walk=(el)=>{
-    for(const c of kids(el)){
-      if(isHtml && /^(script|style|meta|link|br|head)$/i.test(c.localName)) continue;
-      const p=pathOf(c);
-      const has=c.children.length>0||c.attributes.length>0;
-      const e=counts.get(p)||{path:p,count:0,rich:0,els:[]};
-      e.count++; if(has)e.rich++; e.els.push(c); counts.set(p,e);
-      walk(c);
+  const t=cleanSource(text);
+  if(!t) return {};
+  const isPage=/^<(!doctype\s+html|html)[\s>]/i.test(t);
+  let r=isPage?{err:'This looks like a web page rather than XML.'}:parseXml(t);
+  if(r.doc) return r;
+  // Page source that shows the XML as escaped text (e.g. inside <pre>): decode and try again
+  if(/&lt;/.test(t)){
+    const h=new DOMParser().parseFromString(t,'text/html');
+    const blocks=[...h.querySelectorAll('pre,textarea,xmp,code')].map(e=>e.textContent);
+    blocks.push(h.body?h.body.textContent:'');
+    for(const b of blocks.sort((a,b)=>b.length-a.length)){
+      const inner=cleanSource(b); if(!inner.startsWith('<'))continue;
+      const r2=parseXml(inner); if(r2.doc) return {doc:r2.doc,decoded:true};
     }
-  };
-  walk(d.documentElement);
-  return [...counts.values()].filter(e=>e.count>1)
-    .map(e=>({...e,score:e.count*(e.rich?2:1)*Math.min(4,1+avgChildren(e.els))}))
-    .sort((a,b)=>b.score-a.score);
-}
-function avgChildren(els){let n=0;for(const e of els.slice(0,20))n+=e.children.length+e.attributes.length;return n/Math.min(els.length,20)}
-
-function flatten(el,opts){
-  const out={};
-  const add=(k,v)=>{v=v.replace(/\s+/g,' ').trim();if(!(k in out))out[k]=[];out[k].push(v)};
-  const walk=(node,prefix)=>{
-    if(opts.attrs) for(const a of node.attributes) add((prefix?prefix+'/':'')+'@'+a.name,a.value);
-    const ch=kids(node);
-    if(!ch.length){add(prefix||'value',node.textContent);return}
-    const own=Array.from(node.childNodes).filter(n=>n.nodeType===3||n.nodeType===4).map(n=>n.nodeValue).join('').trim();
-    if(own) add((prefix?prefix+'/':'')+'#text',own);
-    for(const c of ch) walk(c,(prefix?prefix+'/':'')+name(c));
-  };
-  walk(el,'');
-  const res={};
-  for(const k in out){
-    const vals=out[k];
-    res[k]=opts.multi==='first'?vals[0]:vals.filter(v=>v!=='').join(opts.multi);
   }
-  return res;
+  return {err:r.err||'This is not valid XML.'};
+}
+
+/* ---------- record detection ---------- */
+function sameNames(kids){return kids.length>0&&kids.every(k=>tag(k)===tag(kids[0]))}
+function autoRecords(d){
+  let n=d.documentElement;
+  for(;;){
+    const kids=elKids(n);
+    if(kids.length===1&&sameNames(elKids(kids[0]))&&elKids(kids[0]).length>0&&!sameNames(elKids(elKids(kids[0])[0]))){n=kids[0];continue}
+    if(kids.length===1&&sameNames(elKids(kids[0]))&&elKids(kids[0]).length>1){n=kids[0];continue}
+    break;
+  }
+  const kids=elKids(n);
+  if(sameNames(kids)&&kids.some(k=>k.children.length||k.attributes.length)) return {els:kids,label:`<${tag(kids[0])}> × ${kids.length}`};
+  return {els:[n],label:`<${tag(n)}> (whole document, 1 row)`};
+}
+function findCandidates(d){
+  const auto=autoRecords(d);
+  const list=[{...auto,label:'Auto: '+auto.label}];
+  const counts=new Map();
+  const walk=el=>{for(const c of elKids(el)){const p=pathOf(c);const e=counts.get(p)||{path:p,els:[]};e.els.push(c);counts.set(p,e);walk(c)}};
+  walk(d.documentElement);
+  [...counts.values()].filter(e=>e.els.length>1&&e.els.some(x=>x.children.length))
+    .sort((a,b)=>a.path.split('/').length-b.path.split('/').length||b.els.length-a.els.length)
+    .slice(0,30)
+    .forEach(e=>{if(e.els[0]!==auto.els[0]||e.els.length!==auto.els.length)list.push({els:e.els,label:`<${tag(e.els[0])}> × ${e.els.length} — ${e.path}`})});
+  if(auto.els[0]!==d.documentElement)list.push({els:[d.documentElement],label:`<${tag(d.documentElement)}> (whole document, 1 row)`});
+  return list;
+}
+
+/* ---------- flattening ----------
+   Element with only text      -> its text
+   Attributes                  -> _name
+   Text next to attributes     -> __text
+   Repeated child tags         -> Tag/0, Tag/1 ...
+   Attributes come after child elements; __text comes last.          */
+/* Paths (from the record down) where a tag repeats in at least one record.
+   Those tags are numbered in every record, so a one-item order still gets OrderItem/0/... */
+function findArrayPaths(recs){
+  const set=new Set();
+  const walk=(el,p)=>{
+    const seen=new Map();
+    for(const c of elKids(el)){const k=tag(c);seen.set(k,(seen.get(k)||0)+1);walk(c,p+'/'+k)}
+    for(const [k,n] of seen) if(n>1) set.add(p+'/'+k);
+  };
+  for(const r of recs) walk(r,'');
+  return set;
+}
+function toNode(el,o,p=''){
+  const kids=elKids(el), attrs=o.attrs?Array.from(el.attributes):[];
+  let text='';
+  for(const n of el.childNodes) if(n.nodeType===3||n.nodeType===4) text+=n.nodeValue;
+  text=text.trim();
+  if(!kids.length&&!attrs.length) return {t:'s',v:text};
+  const m=new Map();
+  for(const c of kids){
+    const k=tag(c), cp=p+'/'+k, v=toNode(c,o,cp);
+    if(!m.has(k)) m.set(k,o.arrays&&o.arrays.has(cp)?{t:'a',items:[v]}:v);
+    else {const cur=m.get(k); if(cur.t==='a')cur.items.push(v); else m.set(k,{t:'a',items:[cur,v]})}
+  }
+  for(const a of attrs) m.set('_'+a.name,{t:'s',v:a.value});
+  if(text) m.set('__text',{t:'s',v:text});
+  return {t:'o',m};
+}
+function flatten(node,prefix,out,o){
+  const key=k=>prefix?prefix+'/'+k:k;
+  if(node.t==='s'){out.set(prefix,node.v);return}
+  if(node.t==='o'){for(const [k,v] of node.m)flatten(v,key(k),out,o);return}
+  // repeated tags
+  if(o.multi==='index'){node.items.forEach((it,i)=>flatten(it,key(String(i)),out,o));return}
+  if(o.multi==='first'){flatten(node.items[0],prefix,out,o);return}
+  const parts=node.items.map(it=>{const m=new Map();flatten(it,prefix,m,o);return m});
+  for(const m of parts)for(const [k,v] of m){
+    if(!out.has(k))out.set(k,[]);
+    const cur=out.get(k); if(Array.isArray(cur)){if(v!=='')cur.push(v)}
+  }
+  for(const m of parts)for(const k of m.keys()){const v=out.get(k);if(Array.isArray(v))out.set(k,v.join(o.multi))}
+}
+function recordToRow(el,o){
+  const node=toNode(el,o), out=new Map();
+  if(node.t==='s') out.set(tag(el),node.v); else flatten(node,'',out,o);
+  return out;
 }
 
 function opts(){return{attrs:$('attrs').checked,multi:$('multi').value}}
@@ -273,91 +395,111 @@ function opts(){return{attrs:$('attrs').checked,multi:$('multi').value}}
 function build(){
   const c=candidates[recSel.selectedIndex];
   rows=[];columns=[];
-  if(!c){render();return}
-  const o=opts(),seen=new Set();
-  for(const el of c.els){const r=flatten(el,o);rows.push(r);for(const k in r)if(!seen.has(k)){seen.add(k);columns.push(k)}}
-  const prev=enabled; enabled=new Set(columns.filter(k=>prev.size===0||prev.has(k)||!prev.__known?.has(k)));
+  if(c){
+    const o=opts(),seen=new Set(); o.arrays=findArrayPaths(c.els);
+    for(const el of c.els){const r=recordToRow(el,o);rows.push(r);for(const k of r.keys())if(!seen.has(k)){seen.add(k);columns.push(k)}}
+  }
+  if(!userTouched) enabled=new Set(columns);
+  else { const prev=enabled; enabled=new Set(columns.filter(k=>prev.has(k)||!prev.__known||!prev.__known.has(k))); }
   enabled.__known=new Set(columns);
   render();
 }
 
 function activeCols(){return columns.filter(c=>enabled.has(c))}
 
+function renderChips(){
+  const f=$('col-filter').value.trim().toLowerCase();
+  $('cols').innerHTML=columns.map((c,i)=>f&&!c.toLowerCase().includes(f)?'':`<span class="chip ${enabled.has(c)?'on':''}" role="checkbox" tabindex="0" aria-checked="${enabled.has(c)}" data-i="${i}">${esc(c)}</span>`).join('')||'<span class="note">No columns match.</span>';
+  $('col-summary').textContent=columns.length?`Columns: ${activeCols().length} of ${columns.length} included — click to choose`:'Columns';
+}
+
 function render(){
   const cols=activeCols();
-  $('stats').innerHTML=rows.length?`<div class="stat"><b>${rows.length.toLocaleString()}</b><span>Rows</span></div><div class="stat"><b>${cols.length}</b><span>Columns</span></div>`:'';
-  $('cols').innerHTML=columns.map((c,i)=>`<span class="chip ${enabled.has(c)?'on':''}" role="checkbox" tabindex="0" aria-checked="${enabled.has(c)}" data-i="${i}">${esc(c)}</span>`).join('')||'<span class="note">No columns yet.</span>';
+  $('stats').innerHTML=rows.length?`<div class="stat"><b>${rows.length.toLocaleString()}</b><span>Rows</span></div><div class="stat"><b>${cols.length.toLocaleString()}</b><span>Columns</span></div>`:'';
+  renderChips();
   const box=$('tablebox');
   if(!rows.length){box.innerHTML='<div class="empty">Paste XML on the left to see rows here.</div>';$('preview-note').textContent='';updateBtns();return}
-  if(!cols.length){box.innerHTML='<div class="empty">All columns are switched off. Click a column name above to include it.</div>';updateBtns();return}
+  if(!cols.length){box.innerHTML='<div class="empty">All columns are left out. Open the column list and include some.</div>';$('preview-note').textContent='';updateBtns();return}
   let h='<table><thead><tr><th class="n">#</th>'+cols.map(c=>`<th title="${esc(c)}">${esc(c)}</th>`).join('')+'</tr></thead><tbody>';
-  rows.slice(0,PREVIEW_MAX).forEach((r,i)=>{h+=`<tr><td class="n">${i+1}</td>`+cols.map(c=>{const v=r[c]??'';return`<td title="${esc(v)}">${esc(v)}</td>`}).join('')+'</tr>'});
+  rows.slice(0,PREVIEW_MAX).forEach((r,i)=>{h+=`<tr><td class="n">${i+1}</td>`+cols.map(c=>{const v=r.get(c)??'';return`<td title="${esc(v)}">${esc(v)}</td>`}).join('')+'</tr>'});
   box.innerHTML=h+'</tbody></table>';
-  $('preview-note').textContent=rows.length>PREVIEW_MAX?`Showing the first ${PREVIEW_MAX} of ${rows.length.toLocaleString()} rows. The CSV includes all of them.`:'';
+  $('preview-note').textContent=rows.length>PREVIEW_MAX?`Preview shows the first ${PREVIEW_MAX} of ${rows.length.toLocaleString()} rows. The CSV includes all of them.`:'';
   updateBtns();
 }
 
+function delim(){return $('delim').value==='tab'?'\t':$('delim').value}
 function toCSV(){
-  const cols=activeCols();
-  let d=$('delim').value; if(d==='\\t')d='\t';
-  const q=v=>{v=v==null?'':String(v);return /[",\r\n;\t]/.test(v)||v.includes(d)||/^\s|\s$/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
-  const header=cols.map(c=>q(c.replace(/^@/,''))).join(d);
-  return [header,...rows.map(r=>cols.map(c=>q(r[c])).join(d))].join('\r\n')+'\r\n';
+  const cols=activeCols(), d=delim();
+  const q=v=>{v=v==null?'':String(v);return (v.includes(d)||/["\r\n]/.test(v))?'"'+v.replace(/"/g,'""')+'"':v};
+  return [cols.map(q).join(d),...rows.map(r=>cols.map(c=>q(r.get(c))).join(d))].join('\r\n')+'\r\n';
 }
 
 function updateBtns(){const ok=rows.length&&activeCols().length;$('btn-dl').disabled=!ok;$('btn-copy').disabled=!ok}
 
 function run(){
   const r=parse(src.value);
-  doc=r.doc; isHtml=!!r.html;
+  doc=r.doc||null; userTouched=false; enabled=new Set();
   const ps=$('parse-status');
-  if(!doc){candidates=[];recSel.innerHTML='';status(ps,'','');build();return}
+  if(!doc){candidates=[];recSel.innerHTML='';status(ps,r.err?'err':'',r.err?`Couldn't read this as XML: ${r.err}`:'');build();return}
   candidates=findCandidates(doc);
-  recSel.innerHTML=candidates.slice(0,40).map(c=>{const leaf=c.path.split('/').pop();return`<option>&lt;${esc(leaf)}&gt; × ${c.count} — ${esc(c.path)}</option>`}).join('');
-  enabled=new Set();
-  if(!candidates.length){status(ps,'err','No repeating elements found. CSV needs at least two records with the same tag.');}
-  else if(isHtml){status(ps,'info','This isn\u2019t strict XML, so it was read as HTML page source. Pick the element that repeats once per row.');}
-  else status(ps,'ok',`Valid XML. Found ${candidates.length} repeating element type${candidates.length>1?'s':''}; using the most likely one.`);
+  recSel.innerHTML=candidates.map(c=>`<option>${esc(c.label)}</option>`).join('');
   build();
+  status(ps,'ok',`${r.decoded?'Found XML inside the page source. ':''}Read ${rows.length.toLocaleString()} row${rows.length===1?'':'s'} with ${columns.length.toLocaleString()} columns.`);
 }
 
-let t;src.addEventListener('input',()=>{clearTimeout(t);t=setTimeout(run,250);});
-recSel.addEventListener('change',()=>{enabled=new Set();build()});
+let t;src.addEventListener('input',()=>{clearTimeout(t);t=setTimeout(run,300)});
+recSel.addEventListener('change',()=>{userTouched=false;build()});
 ['attrs','multi'].forEach(id=>$(id).addEventListener('change',build));
-$('delim').addEventListener('change',()=>{const v=$('delim').value;const f=$('fname');f.value=f.value.replace(/\.(csv|txt)$/i,'')+(v==='\\t'?'.txt':'.csv');});
-$('cols').addEventListener('click',e=>{const el=e.target.closest('.chip');if(!el)return;toggle(+el.dataset.i)});
+$('delim').addEventListener('change',()=>{const f=$('fname');f.value=f.value.replace(/\.(csv|txt|tsv)$/i,'')+($('delim').value==='tab'?'.txt':'.csv')});
+$('col-filter').addEventListener('input',renderChips);
+function setShown(on){
+  const f=$('col-filter').value.trim().toLowerCase();
+  for(const c of columns) if(!f||c.toLowerCase().includes(f)) on?enabled.add(c):enabled.delete(c);
+  userTouched=true; render();
+}
+$('col-all').onclick=()=>setShown(true);
+$('col-none').onclick=()=>setShown(false);
+$('cols').addEventListener('click',e=>{const el=e.target.closest('.chip');if(el)toggle(+el.dataset.i)});
 $('cols').addEventListener('keydown',e=>{const el=e.target.closest('.chip');if(el&&(e.key===' '||e.key==='Enter')){e.preventDefault();toggle(+el.dataset.i);requestAnimationFrame(()=>$('cols').querySelector(`[data-i="${el.dataset.i}"]`)?.focus())}});
-function toggle(i){const c=columns[i];enabled.has(c)?enabled.delete(c):enabled.add(c);render()}
+function toggle(i){const c=columns[i];enabled.has(c)?enabled.delete(c):enabled.add(c);userTouched=true;render()}
 
-$('btn-sample').onclick=()=>{src.value=SAMPLE;$('fname').value='roofing-products.csv';run()};
+$('btn-sample').onclick=()=>{src.value=SAMPLE;$('fname').value='orders-example.csv';run()};
 $('btn-clear').onclick=()=>{src.value='';run();src.focus()};
 
-function loadFile(f){if(!f)return;const rd=new FileReader();rd.onload=()=>{src.value=rd.result;$('fname').value=f.name.replace(/\.[^.]+$/,'')+'.csv';run()};rd.readAsText(f)}
+function loadFile(f){if(!f)return;const rd=new FileReader();rd.onload=()=>{src.value=rd.result;$('fname').value=f.name.replace(/\.[^.]+$/,'')+($('delim').value==='tab'?'.txt':'.csv');run()};rd.readAsText(f)}
 $('file').addEventListener('change',e=>loadFile(e.target.files[0]));
 const drop=$('drop');
-['dragenter','dragover'].forEach(ev=>{drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over')});src.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over')})});
-['dragleave','drop'].forEach(ev=>{drop.addEventListener(ev,()=>drop.classList.remove('over'));src.addEventListener(ev,()=>drop.classList.remove('over'))});
-[drop,src].forEach(el=>el.addEventListener('drop',e=>{e.preventDefault();loadFile(e.dataTransfer.files[0])}));
+[drop,src].forEach(el=>{
+  ['dragenter','dragover'].forEach(ev=>el.addEventListener(ev,e=>{if(e.dataTransfer&&[...e.dataTransfer.types].includes('Files')){e.preventDefault();drop.classList.add('over')}}));
+  ['dragleave','drop'].forEach(ev=>el.addEventListener(ev,()=>drop.classList.remove('over')));
+  el.addEventListener('drop',e=>{if(e.dataTransfer.files.length){e.preventDefault();loadFile(e.dataTransfer.files[0])}});
+});
 
-$('btn-dl').onclick=()=>{
-  const ds=$('dl-status');
-  let fn=$('fname').value.trim()||'converted.csv';
-  if(!/\.(csv|txt)$/i.test(fn))fn+='.csv';
-  const body=($('bom').checked?'\uFEFF':'')+toCSV();
-  const url=URL.createObjectURL(new Blob([body],{type:'text/csv;charset=utf-8'}));
+/* Saving: uses Claude's download prompt when opened as a Claude artifact, a normal browser download everywhere else */
+let claudeDownloads=null;
+(async()=>{try{if(window.claude&&window.claude.use)claudeDownloads=await window.claude.use('downloads')}catch(e){claudeDownloads=null}})();
+function fileName(){let fn=$('fname').value.trim()||'orders.csv';if(!/\.(csv|txt|tsv)$/i.test(fn))fn+='.csv';return fn}
+$('btn-dl').onclick=async()=>{
+  const ds=$('dl-status'), fn=fileName();
+  const blob=new Blob([($('bom').checked?'﻿':'')+toCSV()],{type:'text/csv;charset=utf-8'});
+  if(claudeDownloads){
+    try{await claudeDownloads.save({filename:fn,data:blob});status(ds,'ok',`Saved ${fn}`)}
+    catch(e){const c=e&&e.code;status(ds,c==='declined'?'info':'err',c==='declined'?'Download cancelled.':c==='rate_limited'?'A save prompt is already open. Finish that one first.':'The download couldn’t start here. Use Copy CSV instead.')}
+    return;
+  }
+  const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download=fn;document.body.appendChild(a);a.click();a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
   status(ds,'ok',`Downloaded ${fn}`);
 };
 $('btn-copy').onclick=async()=>{
-  const ds=$('dl-status');const csv=toCSV();
+  const ds=$('dl-status'), csv=toCSV();
   try{await navigator.clipboard.writeText(csv);status(ds,'ok','CSV copied to clipboard.')}
   catch(e){const ta=document.createElement('textarea');ta.value=csv;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
     let ok=false;try{ok=document.execCommand('copy')}catch(_){}ta.remove();status(ds,ok?'ok':'err',ok?'CSV copied to clipboard.':'Copy was blocked. Download the file instead.')}
 };
 
-src.value=SAMPLE;$('fname').value='roofing-products.csv';run();
+src.value=SAMPLE;$('fname').value='orders-example.csv';run();
 </script>
-
 </body>
 </html>
