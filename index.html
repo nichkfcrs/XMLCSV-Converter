@@ -129,7 +129,6 @@ tr:hover td{background:var(--accent-soft)}
           <select id="delim">
             <option value=",">Comma ,</option>
             <option value=";">Semicolon ;</option>
-            <option value="tab">Tab</option>
           </select>
         </div>
         <div class="field">
@@ -163,7 +162,7 @@ tr:hover td{background:var(--accent-soft)}
           <input type="text" id="fname" value="orders.csv">
         </div>
         <div class="actions">
-          <button id="btn-copy" type="button">Copy CSV</button>
+          <button id="btn-copy" type="button" title="Copies with tabs between columns, so it pastes straight into Excel cells">Copy for Excel</button>
           <button id="btn-dl" type="button" class="primary">Download CSV</button>
         </div>
       </div>
@@ -429,9 +428,8 @@ function render(){
   updateBtns();
 }
 
-function delim(){return $('delim').value==='tab'?'\t':$('delim').value}
-function toCSV(){
-  const cols=activeCols(), d=delim();
+function toCSV(d=$('delim').value){
+  const cols=activeCols();
   const q=v=>{v=v==null?'':String(v);return (v.includes(d)||/["\r\n]/.test(v))?'"'+v.replace(/"/g,'""')+'"':v};
   return [cols.map(q).join(d),...rows.map(r=>cols.map(c=>q(r.get(c))).join(d))].join('\r\n')+'\r\n';
 }
@@ -452,7 +450,6 @@ function run(){
 let t;src.addEventListener('input',()=>{clearTimeout(t);t=setTimeout(run,300)});
 recSel.addEventListener('change',()=>{userTouched=false;build()});
 ['attrs','multi'].forEach(id=>$(id).addEventListener('change',build));
-$('delim').addEventListener('change',()=>{const f=$('fname');f.value=f.value.replace(/\.(csv|txt|tsv)$/i,'')+($('delim').value==='tab'?'.txt':'.csv')});
 $('col-filter').addEventListener('input',renderChips);
 function setShown(on){
   const f=$('col-filter').value.trim().toLowerCase();
@@ -468,7 +465,7 @@ function toggle(i){const c=columns[i];enabled.has(c)?enabled.delete(c):enabled.a
 $('btn-sample').onclick=()=>{src.value=SAMPLE;$('fname').value='orders-example.csv';run()};
 $('btn-clear').onclick=()=>{src.value='';run();src.focus()};
 
-function loadFile(f){if(!f)return;const rd=new FileReader();rd.onload=()=>{src.value=rd.result;$('fname').value=f.name.replace(/\.[^.]+$/,'')+($('delim').value==='tab'?'.txt':'.csv');run()};rd.readAsText(f)}
+function loadFile(f){if(!f)return;const rd=new FileReader();rd.onload=()=>{src.value=rd.result;$('fname').value=f.name.replace(/\.[^.]+$/,'')+'.csv';run()};rd.readAsText(f)}
 $('file').addEventListener('change',e=>loadFile(e.target.files[0]));
 const drop=$('drop');
 [drop,src].forEach(el=>{
@@ -480,13 +477,13 @@ const drop=$('drop');
 /* Saving: uses Claude's download prompt when opened as a Claude artifact, a normal browser download everywhere else */
 let claudeDownloads=null;
 (async()=>{try{if(window.claude&&window.claude.use)claudeDownloads=await window.claude.use('downloads')}catch(e){claudeDownloads=null}})();
-function fileName(){let fn=$('fname').value.trim()||'orders.csv';if(!/\.(csv|txt|tsv)$/i.test(fn))fn+='.csv';return fn}
+function fileName(){let fn=$('fname').value.trim()||'orders.csv';fn=fn.replace(/\.(csv|txt|tsv)$/i,'')+'.csv';return fn}
 $('btn-dl').onclick=async()=>{
   const ds=$('dl-status'), fn=fileName();
   const blob=new Blob([($('bom').checked?'﻿':'')+toCSV()],{type:'text/csv;charset=utf-8'});
   if(claudeDownloads){
     try{await claudeDownloads.save({filename:fn,data:blob});status(ds,'ok',`Saved ${fn}`)}
-    catch(e){const c=e&&e.code;status(ds,c==='declined'?'info':'err',c==='declined'?'Download cancelled.':c==='rate_limited'?'A save prompt is already open. Finish that one first.':'The download couldn’t start here. Use Copy CSV instead.')}
+    catch(e){const c=e&&e.code;status(ds,c==='declined'?'info':'err',c==='declined'?'Download cancelled.':c==='rate_limited'?'A save prompt is already open. Finish that one first.':'The download couldn’t start here. Use Copy for Excel instead.')}
     return;
   }
   const url=URL.createObjectURL(blob);
@@ -495,10 +492,10 @@ $('btn-dl').onclick=async()=>{
   status(ds,'ok',`Downloaded ${fn}`);
 };
 $('btn-copy').onclick=async()=>{
-  const ds=$('dl-status'), csv=toCSV();
-  try{await navigator.clipboard.writeText(csv);status(ds,'ok','CSV copied to clipboard.')}
+  const ds=$('dl-status'), csv=toCSV('\t');
+  try{await navigator.clipboard.writeText(csv);status(ds,'ok','Copied. Click cell A1 in Excel and paste.')}
   catch(e){const ta=document.createElement('textarea');ta.value=csv;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
-    let ok=false;try{ok=document.execCommand('copy')}catch(_){}ta.remove();status(ds,ok?'ok':'err',ok?'CSV copied to clipboard.':'Copy was blocked. Download the file instead.')}
+    let ok=false;try{ok=document.execCommand('copy')}catch(_){}ta.remove();status(ds,ok?'ok':'err',ok?'Copied. Click cell A1 in Excel and paste.':'Copy was blocked. Download the file instead.')}
 };
 
 src.value=SAMPLE;$('fname').value='orders-example.csv';run();
