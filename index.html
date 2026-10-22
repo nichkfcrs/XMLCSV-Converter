@@ -310,17 +310,19 @@ function parse(text){
 
 /* ---------- record detection ---------- */
 function sameNames(kids){return kids.length>0&&kids.every(k=>tag(k)===tag(kids[0]))}
+/* Same rule as convertcsv.com: rows come from the first repeating tag found,
+   checking each level's own children before going deeper. No repeats -> one row. */
+function firstArray(el){
+  const groups=new Map();
+  for(const c of elKids(el)){const k=tag(c);if(!groups.has(k))groups.set(k,[]);groups.get(k).push(c)}
+  for(const g of groups.values()) if(g.length>1) return g;
+  for(const g of groups.values()){const r=firstArray(g[0]);if(r)return r}
+  return null;
+}
 function autoRecords(d){
-  let n=d.documentElement;
-  for(;;){
-    const kids=elKids(n);
-    if(kids.length===1&&sameNames(elKids(kids[0]))&&elKids(kids[0]).length>0&&!sameNames(elKids(elKids(kids[0])[0]))){n=kids[0];continue}
-    if(kids.length===1&&sameNames(elKids(kids[0]))&&elKids(kids[0]).length>1){n=kids[0];continue}
-    break;
-  }
-  const kids=elKids(n);
-  if(sameNames(kids)&&kids.some(k=>k.children.length||k.attributes.length)) return {els:kids,label:`<${tag(kids[0])}> × ${kids.length}`};
-  return {els:[n],label:`<${tag(n)}> (whole document, 1 row)`};
+  const g=firstArray(d.documentElement);
+  if(g) return {els:g,label:`<${tag(g[0])}> × ${g.length} — ${pathOf(g[0])}`};
+  return {els:[d.documentElement],label:`<${tag(d.documentElement)}> (whole document, 1 row)`};
 }
 function findCandidates(d){
   const auto=autoRecords(d);
