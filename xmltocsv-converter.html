@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>XML to CSV Converter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: workbench — source pane left, table preview right; stacks on phones */
+:root{
+  --bg:#f3f5f8; --surface:#ffffff; --line:#d8dee8; --fg:#18202e; --muted:#5b6678;
+  --accent:#2d5bd6; --accent-ink:#ffffff; --accent-soft:#e6edfc;
+  --ok:#1f7a4d; --ok-soft:#e3f4ea; --err:#b3261e; --err-soft:#fbe7e5;
+  --code-bg:#f8f9fb;
+  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#10141c; --surface:#171d28; --line:#2a3344; --fg:#e4e9f2; --muted:#98a3b6;
+  --accent:#7b9dff; --accent-ink:#0d1220; --accent-soft:#1f2a45;
+  --ok:#5fd29a; --ok-soft:#173326; --err:#ff8a80; --err-soft:#3a1c1a;
+  --code-bg:#121821; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10141c; --surface:#171d28; --line:#2a3344; --fg:#e4e9f2; --muted:#98a3b6;
+  --accent:#7b9dff; --accent-ink:#0d1220; --accent-soft:#1f2a45;
+  --ok:#5fd29a; --ok-soft:#173326; --err:#ff8a80; --err-soft:#3a1c1a;
+  --code-bg:#121821; color-scheme:dark}
+
+*{box-sizing:border-box}
+html{color-scheme:light}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+.wrap{max-width:1400px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+h1{font-size:1.5rem;margin:0;letter-spacing:-.01em;text-wrap:balance}
+h1 code{font-family:var(--f-mono);font-size:.82em;color:var(--accent);font-weight:600}
+.sub{margin:4px 0 0;color:var(--muted);max-width:62ch}
+.grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:18px;align-items:start}
+@media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.label{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700}
+textarea{width:100%;min-height:340px;resize:vertical;font-family:var(--f-mono);font-size:12.5px;line-height:1.55;
+  background:var(--code-bg);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:12px;tab-size:2}
+textarea:focus,select:focus,input:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.drop{border:1.5px dashed var(--line);border-radius:8px;padding:12px;text-align:center;color:var(--muted);font-size:.9rem;cursor:pointer}
+.drop.over{border-color:var(--accent);background:var(--accent-soft);color:var(--fg)}
+.drop strong{color:var(--accent)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+select,input[type=text]{font:inherit;font-size:.9rem;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:6px 8px;max-width:100%}
+.check{display:flex;gap:6px;align-items:center;font-size:.9rem;cursor:pointer}
+button{font:inherit;font-size:.9rem;border-radius:6px;padding:8px 14px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+button.primary:hover{filter:brightness(1.08)}
+button:disabled{opacity:.5;cursor:not-allowed}
+.status{font-size:.85rem;padding:6px 10px;border-radius:6px;display:inline-flex;gap:6px;align-items:center}
+.status.ok{background:var(--ok-soft);color:var(--ok)}
+.status.err{background:var(--err-soft);color:var(--err)}
+.status.info{background:var(--accent-soft);color:var(--fg)}
+.stats{display:flex;flex-wrap:wrap;gap:18px;font-variant-numeric:tabular-nums}
+.stat b{display:block;font-size:1.35rem;font-family:var(--f-mono);font-weight:600}
+.stat span{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.cols{display:flex;flex-wrap:wrap;gap:6px;max-height:140px;overflow:auto}
+.chip{font-family:var(--f-mono);font-size:11.5px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);cursor:pointer;user-select:none;background:var(--surface);color:var(--muted)}
+.chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--fg)}
+.tablebox{overflow:auto;max-height:460px;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums;min-width:100%}
+th,td{padding:6px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;white-space:nowrap;max-width:320px;overflow:hidden;text-overflow:ellipsis}
+th{position:sticky;top:0;background:var(--code-bg);font-family:var(--f-mono);font-weight:600;font-size:11.5px;z-index:1}
+td.n,th.n{color:var(--muted);text-align:right;font-family:var(--f-mono)}
+tr:hover td{background:var(--accent-soft)}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+.note{font-size:.82rem;color:var(--muted)}
+.actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.hidden-input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>XML <code>→</code> CSV Converter</h1>
+      <p class="sub">Internal tool. Everything runs in your browser; nothing you paste is uploaded. Paste page source or drop an XML file. The converter finds the repeating records, flattens nested tags and attributes into columns, and gives you a CSV to download.</p>
+    </div>
+  </header>
+
+  <div class="grid">
+    <section class="panel" aria-labelledby="src-label">
+      <div class="panel-head">
+        <span class="label" id="src-label">Source</span>
+        <div class="row">
+          <button id="btn-sample" type="button">Load example</button>
+          <button id="btn-clear" type="button">Clear</button>
+        </div>
+      </div>
+      <label class="drop" id="drop" for="file">
+        Drop an <strong>.xml</strong> file here or click to choose one
+        <input class="hidden-input" type="file" id="file" accept=".xml,.rss,.atom,.kml,.gpx,.txt,.html,text/xml,application/xml">
+      </label>
+      <textarea id="src" spellcheck="false" aria-label="XML source" placeholder="<?xml version=&quot;1.0&quot;?>&#10;<items>&#10;  <item>…</item>&#10;</items>"></textarea>
+      <div id="parse-status"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="out-label">
+      <div class="panel-head">
+        <span class="label" id="out-label">Spreadsheet preview</span>
+        <div class="stats" id="stats"></div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label class="label" for="rec">Each row is one</label>
+          <select id="rec"></select>
+        </div>
+        <div class="field">
+          <label class="label" for="delim">Separator</label>
+          <select id="delim">
+            <option value=",">Comma ,</option>
+            <option value=";">Semicolon ;</option>
+            <option value="\t">Tab</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="label" for="multi">Repeated tags</label>
+          <select id="multi">
+            <option value=" | ">Join with |</option>
+            <option value="; ">Join with ;</option>
+            <option value="first">Keep first only</option>
+          </select>
+        </div>
+        <label class="check"><input type="checkbox" id="attrs" checked> Include attributes</label>
+        <label class="check"><input type="checkbox" id="bom" checked> Excel-friendly (UTF-8 BOM)</label>
+      </div>
+
+      <div class="field">
+        <span class="label">Columns <span class="note" style="text-transform:none;letter-spacing:0;font-weight:400">— click to include or leave out</span></span>
+        <div class="cols" id="cols"></div>
+      </div>
+
+      <div class="tablebox" id="tablebox"><div class="empty">Paste XML on the left to see rows here.</div></div>
+      <p class="note" id="preview-note"></p>
+
+      <div class="row" style="justify-content:space-between">
+        <div class="field" style="flex:1 1 200px">
+          <label class="label" for="fname">File name</label>
+          <input type="text" id="fname" value="converted.csv">
+        </div>
+        <div class="actions">
+          <button id="btn-copy" type="button">Copy CSV</button>
+          <button id="btn-dl" type="button" class="primary">Download CSV</button>
+        </div>
+      </div>
+      <div id="dl-status"></div>
+    </section>
+  </div>
+</div>
+
+<script>
+const SAMPLE = `<?xml version="1.0" encoding="UTF-8"?>
+<!-- Example data: a roofing supplier product feed -->
+<catalog supplier="Example Supply Co" updated="2026-10-01">
+  <product sku="RF-1001" status="active">
+    <name>Colorbond Trimdek Sheet</name>
+    <category>Roof Sheeting</category>
+    <price currency="AUD">42.50</price>
+    <unit>per metre</unit>
+    <colours><colour>Monument</colour><colour>Surfmist</colour><colour>Woodland Grey</colour></colours>
+    <dimensions><width>762</width><thickness>0.42</thickness></dimensions>
+  </product>
+  <product sku="RF-1002" status="active">
+    <name>Ridge Capping 2.4m</name>
+    <category>Flashings</category>
+    <price currency="AUD">28.90</price>
+    <unit>each</unit>
+    <colours><colour>Monument</colour><colour>Basalt</colour></colours>
+    <dimensions><width>300</width><thickness>0.55</thickness></dimensions>
+  </product>
+  <product sku="RF-1003" status="discontinued">
+    <name>Valley Iron 3.0m</name>
+    <category>Flashings</category>
+    <price currency="AUD">36.00</price>
+    <unit>each</unit>
+    <colours><colour>Zincalume</colour></colours>
+    <dimensions><width>480</width><thickness>0.55</thickness></dimensions>
+  </product>
+  <product sku="RF-1004" status="active">
+    <name>Roofing Screws Type 17 (100 pk)</name>
+    <category>Fasteners</category>
+    <price currency="AUD">31.75</price>
+    <unit>pack</unit>
+    <colours><colour>Monument</colour><colour>Surfmist</colour></colours>
+    <dimensions><width></width><thickness></thickness></dimensions>
+  </product>
+  <product sku="RF-1005" status="active">
+    <name>Anticon Blanket 60mm</name>
+    <category>Insulation</category>
+    <price currency="AUD">189.00</price>
+    <unit>roll</unit>
+    <colours/>
+    <dimensions><width>1350</width><thickness>60</thickness></dimensions>
+  </product>
+</catalog>`;
+
+const $ = id => document.getElementById(id);
+const src=$('src'), recSel=$('rec');
+let doc=null, candidates=[], columns=[], rows=[], enabled=new Set(), isHtml=false;
+const PREVIEW_MAX=200;
+
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function status(el,kind,msg){el.innerHTML=msg?`<span class="status ${kind}">${esc(msg)}</span>`:''}
+function name(el){return el.localName ? (el.prefix?el.prefix+':':'')+el.localName : el.nodeName}
+function kids(el){return Array.from(el.children)}
+function pathOf(el){const p=[];while(el && el.parentElement){p.unshift(name(el));el=el.parentElement}if(el)p.unshift(name(el));return p.join('/')}
+
+function parse(text){
+  text=text.trim();
+  if(!text) return {doc:null};
+  let d=new DOMParser().parseFromString(text,'application/xml');
+  const pe=d.querySelector('parsererror');
+  if(!pe) return {doc:d,html:false};
+  // Fall back to HTML parsing for web page source
+  const h=new DOMParser().parseFromString(text,'text/html');
+  const msg=(pe.textContent||'').split('\n').find(l=>l.trim())||'Invalid XML';
+  return {doc:h,html:true,warn:msg.trim()};
+}
+
+function findCandidates(d){
+  const counts=new Map();
+  const walk=(el)=>{
+    for(const c of kids(el)){
+      if(isHtml && /^(script|style|meta|link|br|head)$/i.test(c.localName)) continue;
+      const p=pathOf(c);
+      const has=c.children.length>0||c.attributes.length>0;
+      const e=counts.get(p)||{path:p,count:0,rich:0,els:[]};
+      e.count++; if(has)e.rich++; e.els.push(c); counts.set(p,e);
+      walk(c);
+    }
+  };
+  walk(d.documentElement);
+  return [...counts.values()].filter(e=>e.count>1)
+    .map(e=>({...e,score:e.count*(e.rich?2:1)*Math.min(4,1+avgChildren(e.els))}))
+    .sort((a,b)=>b.score-a.score);
+}
+function avgChildren(els){let n=0;for(const e of els.slice(0,20))n+=e.children.length+e.attributes.length;return n/Math.min(els.length,20)}
+
+function flatten(el,opts){
+  const out={};
+  const add=(k,v)=>{v=v.replace(/\s+/g,' ').trim();if(!(k in out))out[k]=[];out[k].push(v)};
+  const walk=(node,prefix)=>{
+    if(opts.attrs) for(const a of node.attributes) add((prefix?prefix+'/':'')+'@'+a.name,a.value);
+    const ch=kids(node);
+    if(!ch.length){add(prefix||'value',node.textContent);return}
+    const own=Array.from(node.childNodes).filter(n=>n.nodeType===3||n.nodeType===4).map(n=>n.nodeValue).join('').trim();
+    if(own) add((prefix?prefix+'/':'')+'#text',own);
+    for(const c of ch) walk(c,(prefix?prefix+'/':'')+name(c));
+  };
+  walk(el,'');
+  const res={};
+  for(const k in out){
+    const vals=out[k];
+    res[k]=opts.multi==='first'?vals[0]:vals.filter(v=>v!=='').join(opts.multi);
+  }
+  return res;
+}
+
+function opts(){return{attrs:$('attrs').checked,multi:$('multi').value}}
+
+function build(){
+  const c=candidates[recSel.selectedIndex];
+  rows=[];columns=[];
+  if(!c){render();return}
+  const o=opts(),seen=new Set();
+  for(const el of c.els){const r=flatten(el,o);rows.push(r);for(const k in r)if(!seen.has(k)){seen.add(k);columns.push(k)}}
+  const prev=enabled; enabled=new Set(columns.filter(k=>prev.size===0||prev.has(k)||!prev.__known?.has(k)));
+  enabled.__known=new Set(columns);
+  render();
+}
+
+function activeCols(){return columns.filter(c=>enabled.has(c))}
+
+function render(){
+  const cols=activeCols();
+  $('stats').innerHTML=rows.length?`<div class="stat"><b>${rows.length.toLocaleString()}</b><span>Rows</span></div><div class="stat"><b>${cols.length}</b><span>Columns</span></div>`:'';
+  $('cols').innerHTML=columns.map((c,i)=>`<span class="chip ${enabled.has(c)?'on':''}" role="checkbox" tabindex="0" aria-checked="${enabled.has(c)}" data-i="${i}">${esc(c)}</span>`).join('')||'<span class="note">No columns yet.</span>';
+  const box=$('tablebox');
+  if(!rows.length){box.innerHTML='<div class="empty">Paste XML on the left to see rows here.</div>';$('preview-note').textContent='';updateBtns();return}
+  if(!cols.length){box.innerHTML='<div class="empty">All columns are switched off. Click a column name above to include it.</div>';updateBtns();return}
+  let h='<table><thead><tr><th class="n">#</th>'+cols.map(c=>`<th title="${esc(c)}">${esc(c)}</th>`).join('')+'</tr></thead><tbody>';
+  rows.slice(0,PREVIEW_MAX).forEach((r,i)=>{h+=`<tr><td class="n">${i+1}</td>`+cols.map(c=>{const v=r[c]??'';return`<td title="${esc(v)}">${esc(v)}</td>`}).join('')+'</tr>'});
+  box.innerHTML=h+'</tbody></table>';
+  $('preview-note').textContent=rows.length>PREVIEW_MAX?`Showing the first ${PREVIEW_MAX} of ${rows.length.toLocaleString()} rows. The CSV includes all of them.`:'';
+  updateBtns();
+}
+
+function toCSV(){
+  const cols=activeCols();
+  let d=$('delim').value; if(d==='\\t')d='\t';
+  const q=v=>{v=v==null?'':String(v);return /[",\r\n;\t]/.test(v)||v.includes(d)||/^\s|\s$/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+  const header=cols.map(c=>q(c.replace(/^@/,''))).join(d);
+  return [header,...rows.map(r=>cols.map(c=>q(r[c])).join(d))].join('\r\n')+'\r\n';
+}
+
+function updateBtns(){const ok=rows.length&&activeCols().length;$('btn-dl').disabled=!ok;$('btn-copy').disabled=!ok}
+
+function run(){
+  const r=parse(src.value);
+  doc=r.doc; isHtml=!!r.html;
+  const ps=$('parse-status');
+  if(!doc){candidates=[];recSel.innerHTML='';status(ps,'','');build();return}
+  candidates=findCandidates(doc);
+  recSel.innerHTML=candidates.slice(0,40).map(c=>{const leaf=c.path.split('/').pop();return`<option>&lt;${esc(leaf)}&gt; × ${c.count} — ${esc(c.path)}</option>`}).join('');
+  enabled=new Set();
+  if(!candidates.length){status(ps,'err','No repeating elements found. CSV needs at least two records with the same tag.');}
+  else if(isHtml){status(ps,'info','This isn\u2019t strict XML, so it was read as HTML page source. Pick the element that repeats once per row.');}
+  else status(ps,'ok',`Valid XML. Found ${candidates.length} repeating element type${candidates.length>1?'s':''}; using the most likely one.`);
+  build();
+}
+
+let t;src.addEventListener('input',()=>{clearTimeout(t);t=setTimeout(run,250);});
+recSel.addEventListener('change',()=>{enabled=new Set();build()});
+['attrs','multi'].forEach(id=>$(id).addEventListener('change',build));
+$('delim').addEventListener('change',()=>{const v=$('delim').value;const f=$('fname');f.value=f.value.replace(/\.(csv|txt)$/i,'')+(v==='\\t'?'.txt':'.csv');});
+$('cols').addEventListener('click',e=>{const el=e.target.closest('.chip');if(!el)return;toggle(+el.dataset.i)});
+$('cols').addEventListener('keydown',e=>{const el=e.target.closest('.chip');if(el&&(e.key===' '||e.key==='Enter')){e.preventDefault();toggle(+el.dataset.i);requestAnimationFrame(()=>$('cols').querySelector(`[data-i="${el.dataset.i}"]`)?.focus())}});
+function toggle(i){const c=columns[i];enabled.has(c)?enabled.delete(c):enabled.add(c);render()}
+
+$('btn-sample').onclick=()=>{src.value=SAMPLE;$('fname').value='roofing-products.csv';run()};
+$('btn-clear').onclick=()=>{src.value='';run();src.focus()};
+
+function loadFile(f){if(!f)return;const rd=new FileReader();rd.onload=()=>{src.value=rd.result;$('fname').value=f.name.replace(/\.[^.]+$/,'')+'.csv';run()};rd.readAsText(f)}
+$('file').addEventListener('change',e=>loadFile(e.target.files[0]));
+const drop=$('drop');
+['dragenter','dragover'].forEach(ev=>{drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over')});src.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over')})});
+['dragleave','drop'].forEach(ev=>{drop.addEventListener(ev,()=>drop.classList.remove('over'));src.addEventListener(ev,()=>drop.classList.remove('over'))});
+[drop,src].forEach(el=>el.addEventListener('drop',e=>{e.preventDefault();loadFile(e.dataTransfer.files[0])}));
+
+$('btn-dl').onclick=()=>{
+  const ds=$('dl-status');
+  let fn=$('fname').value.trim()||'converted.csv';
+  if(!/\.(csv|txt)$/i.test(fn))fn+='.csv';
+  const body=($('bom').checked?'\uFEFF':'')+toCSV();
+  const url=URL.createObjectURL(new Blob([body],{type:'text/csv;charset=utf-8'}));
+  const a=document.createElement('a');a.href=url;a.download=fn;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  status(ds,'ok',`Downloaded ${fn}`);
+};
+$('btn-copy').onclick=async()=>{
+  const ds=$('dl-status');const csv=toCSV();
+  try{await navigator.clipboard.writeText(csv);status(ds,'ok','CSV copied to clipboard.')}
+  catch(e){const ta=document.createElement('textarea');ta.value=csv;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
+    let ok=false;try{ok=document.execCommand('copy')}catch(_){}ta.remove();status(ds,ok?'ok':'err',ok?'CSV copied to clipboard.':'Copy was blocked. Download the file instead.')}
+};
+
+src.value=SAMPLE;$('fname').value='roofing-products.csv';run();
+</script>
+
+</body>
+</html>
